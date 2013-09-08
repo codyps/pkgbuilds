@@ -1,0 +1,60 @@
+# $Id: PKGBUILD 94013 2013-07-13 12:30:36Z svenstaro $
+# Maintainer: Timothy Redaelli <timothy.redaelli@gmail.com>
+# Contributor: shahid <helllamer@gmail.com>
+
+pkgbase=litecoin
+pkgname=("${pkgbase}-daemon" "${pkgbase}-qt")
+pkgver=0.8.4.1
+pkgrel=2
+arch=('i686' 'x86_64')
+url="http://www.${pkgbase}.org/"
+makedepends=('boost' 'automoc4' 'qrencode' 'miniupnpc')
+license=('MIT')
+source=(https://github.com/litecoin-project/litecoin/tarball/v$pkgver
+	${pkgbase}-qt.install)
+sha256sums=('de85287bb4689626cc47818e56550d12d693eb2419b0e9178efc6251f3b61e19'
+            'ebf7090ca1202e2c2ccd1aa5bb03e6ac911c458141a1cedda9b41f9c26c2602c')
+
+build() {
+  cd "$srcdir/$pkgbase-project-$pkgbase-"*
+
+  # and make qt gui
+  #qmake-qt4 USE_QRCODE=1
+  qmake-qt4
+  make
+
+  # make *coind
+  make -f makefile.unix -C src  CXXFLAGS="$CXXFLAGS"
+}
+
+
+package_litecoin-qt() {
+  pkgdesc="${pkgbase} is a peer-to-peer network based digital currency - QT"
+  depends=(boost-libs qt4 miniupnpc qrencode)
+  install=${pkgbase}-qt.install
+
+  cd "$srcdir/$pkgbase-project-$pkgbase-"*
+  install -Dm755 ${pkgbase}-qt "$pkgdir"/usr/bin/${pkgbase}-qt
+  install -Dm644 contrib/debian/bitcoin-qt.desktop \
+    "$pkgdir"/usr/share/applications/${pkgbase}.desktop
+  install -Dm644 share/pixmaps/bitcoin128.png \
+    "$pkgdir"/usr/share/pixmaps/${pkgbase}128.png
+
+  install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
+
+package_litecoin-daemon() {
+  pkgdesc="${pkgbase} is a peer-to-peer network based digital currency - daemon"
+  depends=(boost-libs miniupnpc openssl)
+
+  cd "$srcdir/$pkgbase-project-$pkgbase-"*
+  install -Dm755 src/${pkgbase}d "$pkgdir"/usr/bin/${pkgbase}d
+  install -Dm644 contrib/debian/examples/bitcoin.conf \
+    "$pkgdir/usr/share/doc/$pkgname/examples/${pkgbase}.conf"
+  install -Dm644 contrib/debian/manpages/bitcoind.1 \
+    "$pkgdir"/usr/share/man/man1/${pkgbase}d.1
+  install -Dm644 contrib/debian/manpages/bitcoin.conf.5 \
+    "$pkgdir"/usr/share/man/man5/${pkgbase}.conf.5
+  install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
+
