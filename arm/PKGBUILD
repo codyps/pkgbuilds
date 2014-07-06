@@ -1,0 +1,31 @@
+# Maintainer: Spider.007 <archPackage@spider007.net>
+# Contributor: Spider.007 <archPackage@spider007.net>
+packager="Spider.007 <archPackage@spider007.net>"
+pkgname=arm
+pkgver=1.4.5.0
+pkgrel=1
+pkgdesc="Anonymizing Relay Monitor is a terminal status monitor for Tor relays. This works much like top does for system usage, providing real time statistics."
+url="http://www.atagar.com/arm/"
+groups=network
+provides=
+license='GPL'
+depends=('python2>2.5')
+source=("https://archive.torproject.org/arm/$pkgname-$pkgver.tar.bz2")
+md5sums=('f85f306e50b90796ab7097d948e8fcf2')
+arch=('any')
+
+prepare() {
+	cd "$srcdir/$pkgname"
+	sed -i 's/python/python2/g' "$pkgname"
+}
+
+package() {
+	cd "$srcdir/$pkgname"
+	rm install
+	install -Dm755 "$pkgname" "$pkgdir"/usr/bin/"$pkgname"
+	mkdir -p "$pkgdir/usr/share/$pkgname"
+	cp -Rp src/* "$pkgdir/usr/share/$pkgname/"
+	install -Dm644 armrc.sample "$pkgdir/usr/share/doc/$pkgname/armrc.sample"
+	install -Dm644 src/resources/arm.1 "$pkgdir/usr/share/man/man1/$pkgname.1"
+}
+
